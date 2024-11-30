@@ -54,10 +54,13 @@ fun ResponsiveSpanLayout(windowWidthSizeClass: WindowWidthSizeClass) {
 The above code will render differently on different window sizes based on
 
 Compact
+
 <img src="./images/compact.png" alt="Compact" width="300"/>
 
-Expanded
-![Expanded](./images/expanded.png)
-
 Medium
-![Medium](./images/medium.png)
+
+<img src="./images/medium.png" alt="Medium" width="450"/>
+
+Expanded
+
+![Expanded](./images/expanded.png)
