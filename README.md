@@ -1,5 +1,7 @@
 A Compose multiplatform Layout that supports that provides a "Span Layout" where the available space is divided into N columns. Each child can provide how many columns it needs to span in Compact, Medium and expanded screen widths.
 
+This is inspired by CSS Bootstrap library's grid system and CSS media query.  
+
 Sample usage:
 
 ```kotlin

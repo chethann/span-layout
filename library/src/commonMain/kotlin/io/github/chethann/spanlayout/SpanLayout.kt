@@ -48,7 +48,9 @@ fun SpanLayout(
     windowWidthSizeClass: WindowWidthSizeClass,
     modifier: Modifier = Modifier,
     interRowSpacing: Dp = 0.dp,
+    gutterSpace: Dp = 0.dp,
     totalSpans: Int = 12,
+    stretchToFillRow: Boolean = false,
     content: @Composable SpanLayoutScope.() -> Unit
 ) {
     val scope = SpanLayoutScopeImpl(windowWidthSizeClass)
@@ -58,33 +60,61 @@ fun SpanLayout(
         content = { scope.content() }
     ) { measurables, constraints ->
         val totalWidth = constraints.maxWidth
-        val eachSpanWidth = totalWidth / totalSpans
+        val gutterSpacePx = gutterSpace.toPx().toInt()
+        val interRowSpacingPx = interRowSpacing.toPx().toInt()
 
-        // Measure children and enforce .span usage
-        val placeables = measurables.map { measurable ->
-            var span = measurable.layoutId as? Int
-            if (span == null && measurables.size > 1) {
-                throw IllegalStateException("Every child in SpanLayout must use the .span modifier.")
-            }
-            if (span!! < 1) {
-                throw IllegalStateException("span can't be less than 1")
-            }
-            if (span > 12) {
-                throw IllegalStateException("span can't be greater than 12")
-            }
-            val childWidth = eachSpanWidth * span
-            val childConstraints = constraints.copy(
-                minWidth = childWidth,
-                maxWidth = childWidth
-            )
-            measurable.measure(childConstraints)
-        }
+        // Adjust total available width to account for gutters
+        val availableWidth = totalWidth - (gutterSpacePx * (totalSpans + 1))
+        val eachSpanWidth = availableWidth / totalSpans
 
         // Arrange children in rows
-        var currentX = 0
+        var currentX = gutterSpacePx // Start with gutter space
         var currentY = 0
         var usedSpans = 0
+        var numberOfIterations = 0
         val rowHeights = mutableListOf<Int>()
+
+        // Measure children and enforce .span usage
+        val placeables = measurables.mapIndexed { index, measurable ->
+            val span = measurable.layoutId as? Int
+                ?: throw IllegalStateException("Every child in SpanLayout must use the .span modifier.")
+            if (span < 1 || span > totalSpans) {
+                throw IllegalStateException("Span must be between 1 and $totalSpans.")
+            }
+
+            val childWidth = eachSpanWidth * span + gutterSpacePx * (span - 1)
+            val childConstraints = constraints.copy(
+                minWidth = childWidth,
+                maxWidth = childWidth,
+            )
+            if (stretchToFillRow) {
+                if (numberOfIterations == 0) {
+                    rowHeights.clear()
+                    usedSpans = 0
+                    var _index = index
+
+                    while (usedSpans + span <= totalSpans && _index <= measurables.size - 1){
+                        rowHeights.add(measurables[_index].maxIntrinsicHeight(childWidth))
+                        usedSpans += span
+                        _index++
+                        numberOfIterations++
+                    }
+                }
+                numberOfIterations--
+                val rowHeight = rowHeights.maxOrNull() ?: 0
+                return@mapIndexed measurable.measure(childConstraints.copy(
+                    minHeight = rowHeight,
+                    maxHeight = rowHeight
+                ))
+            }
+            else {
+                return@mapIndexed measurable.measure(childConstraints)
+            }
+        }
+
+        rowHeights.clear()
+        currentY = 0
+        usedSpans = 0
 
         val positions = mutableListOf<Triple<Int, Int, Placeable>>()
 
@@ -92,15 +122,15 @@ fun SpanLayout(
             val span = measurables[index].layoutId as Int
             if (usedSpans + span > totalSpans) {
                 // Move to the next row
-                currentX = 0
-                currentY += rowHeights.maxOrNull()?.plus(interRowSpacing.toPx().toInt()) ?: 0
+                currentX = gutterSpacePx // Reset to gutter space at row start
+                currentY += rowHeights.maxOrNull()?.plus(interRowSpacingPx) ?: 0
                 rowHeights.clear()
                 usedSpans = 0
             }
 
             positions.add(Triple(currentX, currentY, placeable))
 
-            currentX += placeable.width
+            currentX += placeable.width + gutterSpacePx // Add gutter space
             usedSpans += span
             rowHeights.add(placeable.height)
         }
@@ -114,3 +144,4 @@ fun SpanLayout(
         }
     }
 }
+
