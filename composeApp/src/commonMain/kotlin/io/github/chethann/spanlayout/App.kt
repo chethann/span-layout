@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.MaterialTheme
@@ -160,24 +159,26 @@ fun ResponsiveSpanLayoutTwo(windowWidthSizeClass: WindowWidthSizeClass) {
 fun ResponsiveSpanLayout(windowWidthSizeClass: WindowWidthSizeClass) {
     Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
         SpanLayout(
-            windowWidthSizeClass = windowWidthSizeClass, modifier = Modifier.padding(horizontal = 4.dp),
-            interRowSpacing = 8.dp,
-            totalSpans = 24
+            windowWidthSizeClass = windowWidthSizeClass,
+            interRowSpacing = 4.dp,
+            totalSpans = 12,
+            gutterSpace = 4.dp,
+            stretchToFillRow = true
         ) {
             repeat(12) { index ->
 
-                if (index % 5 == 0) {
+                if (index % 12 == 0) {
                     SpanLayout(
                         windowWidthSizeClass = windowWidthSizeClass,
-                        modifier = Modifier.span(
+                        modifier = Modifier
+                            .span(
                             compactSpan = 12,
                             mediumSpan = 3,
                             expandedSpan = 2
-                        )
-                            .background(Color.Cyan)
+                        ).background(Color.Cyan),
                     ) {
                         repeat(12) { index ->
-                            Text("$index", color = Color.White, modifier = Modifier.span(
+                            Text("$index", modifier = Modifier.span(
                                 compactSpan = 12,
                                 mediumSpan = 3,
                                 expandedSpan = 2
@@ -187,13 +188,12 @@ fun ResponsiveSpanLayout(windowWidthSizeClass: WindowWidthSizeClass) {
                 } else {
                     Box(
                         modifier = Modifier
-                            .padding(horizontal = 4.dp)
                             .height(100.dp)
                             .background(Color.Red)
                             .span(
-                                compactSpan = 12,
+                                compactSpan = 6,
                                 mediumSpan = 3,
-                                expandedSpan = 2
+                                expandedSpan = 1
                             ),
                         contentAlignment = Alignment.Center
                     ) {

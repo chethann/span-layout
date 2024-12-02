@@ -66,3 +66,99 @@ Medium
 Expanded
 
 ![Expanded](./images/expanded.png)
+
+More real life example (A calendar view) with nested SpanLayouts
+
+Compact
+
+<img src="./images/calendar_compact.png" alt="Compact" width="300"/>
+
+Medium
+
+<img src="./images/calendar_medium.png" alt="Medium" width="450"/>
+
+Expanded
+
+![Expanded](./images/calender_expanded.png)
+
+Code for the same. You can see that even for the Month view, SpanLayout with 7 spans is used 
+
+```kotlin
+@Composable
+fun Calender(windowWidthSizeClass: WindowWidthSizeClass) {
+    val daysInMonth = remember { listOf(31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31) }
+    val monthNames = remember { listOf("January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December") }
+    val dayOfTheWeekInitial = remember { listOf("S", "M", "T", "W", "T", "F", "S") }
+    val daysAndMonthNames = daysInMonth.zip(monthNames)
+    var skips = 0
+
+    Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
+        SpanLayout(
+            windowWidthSizeClass = windowWidthSizeClass,
+            interRowSpacing = 8.dp,
+            gutterSpace = 8.dp,
+            stretchToFillRow = true
+        ) {
+            daysAndMonthNames.forEachIndexed { index, daysAndMonthName ->
+                Column(modifier = Modifier
+                    .background(Color.Gray)
+                    .span(
+                        compactSpan = 12,
+                        mediumSpan = 6,
+                        expandedSpan = 4
+                    )
+                ) {
+
+                    Text(daysAndMonthName.second, fontWeight = FontWeight.Bold)
+
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    SpanLayout(
+                        windowWidthSizeClass = windowWidthSizeClass,
+                        interRowSpacing = 4.dp,
+                        gutterSpace = 4.dp,
+                        totalSpans = 7
+                    ) {
+
+                        dayOfTheWeekInitial.forEach {
+                            Text(
+                                it,
+                                fontWeight = FontWeight.Bold,
+                                modifier = Modifier
+                                    .span(
+                                        compactSpan = 1,
+                                        mediumSpan = 1,
+                                        expandedSpan = 1
+                                    )
+                            )
+                        }
+
+                        repeat(skips) {
+                            Box(modifier = Modifier
+                                .span(
+                                    compactSpan = 1,
+                                    mediumSpan = 1,
+                                    expandedSpan = 1
+                                ))
+                        }
+
+                        skips = (skips + daysAndMonthName.first) % 7
+
+                        repeat(daysAndMonthName.first) { index ->
+                            Text(
+                                (index + 1).toString(),
+                                modifier = Modifier
+                                    .span(
+                                    compactSpan = 1,
+                                    mediumSpan = 1,
+                                    expandedSpan = 1
+                                )
+                            )
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+```

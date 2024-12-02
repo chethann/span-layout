@@ -50,7 +50,7 @@ fun SpanLayout(
     interRowSpacing: Dp = 0.dp,
     gutterSpace: Dp = 0.dp,
     totalSpans: Int = 12,
-    stretchToFillRow: Boolean = false,
+    stretchToFillRow: Boolean = false, // This has some bugs
     content: @Composable SpanLayoutScope.() -> Unit
 ) {
     val scope = SpanLayoutScopeImpl(windowWidthSizeClass)
@@ -102,6 +102,7 @@ fun SpanLayout(
                 }
                 numberOfIterations--
                 val rowHeight = rowHeights.maxOrNull() ?: 0
+                println("rowHeight $rowHeight")
                 return@mapIndexed measurable.measure(childConstraints.copy(
                     minHeight = rowHeight,
                     maxHeight = rowHeight
